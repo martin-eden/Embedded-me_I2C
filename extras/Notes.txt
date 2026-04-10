@@ -1,0 +1,64 @@
+(
+  Bitfields and hardware-linked memory
+
+    struct TDemo
+      TUInt_1 Data : 1
+      TUInt_1 Status : 1
+      TUint_1 : 6
+
+    TDemo Demo = (TDemo *) 100
+
+  Using bitfield record without "volatile" makes compiler think
+  it can know it's contents from previous code. Making record
+  write-only register. No feedback from hardware.
+
+  Using bitfield record with "volatile" makes compiler update
+  all byte when one bit is read or written.
+
+  Additional quirk "is bit can be reset by writing one" schizophrenia
+  from ATmega. Problem is that one bit is used as I/O by hardware.
+
+  When it is set to 1 by hardware it means operation is complete
+  and hardware idles. 0 means operation in progress.
+
+  When it is set to 1 by software it means operation needs to be
+  done and software idles. 0 means operation in progress,
+  software idles.
+
+  So after setting that bit to 1 next read software sees it as 0
+  which means hardware is doing job.
+
+  But that damned bit can also be write as 1 when updating bitfield.
+  Hardware tracks byte writes, not bit writes.
+
+  Setting it to 0 before doing changes has no effect. Next read will
+  read it as 1. Hardware magic.
+
+
+  So in this implementation we have functions to copy that "volatile"
+  registers and set them to copy. We're working with copies.
+
+  Cases when we're changing one bit or just reading bits are safe.
+  We don't have to use wrappers for them.
+
+) 2026-04-09
+
+(
+  Today I finished code
+
+  Use case was reading data from Slave device.
+
+  Implementing Slave mode just for completeness is not planned.
+
+  Annoyance was when I discovered that hardware will not show you
+  byte it got until you tell it how to respond for it (ACK or NACK).
+
+  Kinda stupid annoying quirk. In protocol when you are master you're
+  moving clocks. So you just did 8 clock ticks and got 8 data bits
+  from Slave. You can think about value you've got before doing 9th
+  tick with your response.
+
+  I was designing top-bottom and wrote high-level code in that
+  assumption. Was forced to redesign it to match realities.
+
+) 2026-04-10
