@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-10
+  Last mod.: 2026-04-11
 */
 
 #include <me_I2C.h>
@@ -156,6 +156,14 @@ void TI2C_Master_Bare::Stop()
   */
 
   Bare_ATmega328::TControl State;
+  TUint_1 Status;
+
+  /*
+    Protocol does not allow sending Stop after we acknowledged.
+  */
+  Status = GetStatus();
+  if (Status == (TUint_1) Bare_ATmega328::Statuses::Got_Data_Sent_Ack)
+    return;
 
   State = GetState();
 
@@ -281,4 +289,5 @@ TUint_1 TI2C_Master_Bare::Get_Byte(
   2026-04-07
   2026-04-08
   2026-04-10
+  2026-04-11
 */
