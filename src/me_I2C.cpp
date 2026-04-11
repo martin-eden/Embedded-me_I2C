@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-10
+  Last mod.: 2026-04-11
 */
 
 #include <me_I2C.h>
@@ -88,9 +88,18 @@ TBool TI2C_Master::Receive(
   /*
     Similar as for Send() we will emit stop condition and return false
     if output stream fails.
+
+    Caveat is that we must say whether we are happy with byte received
+    before hardware show it to us. If we said we are happy but then
+    discovered we can't write it to stream we can't stop. We may ask
+    to stop at receiving next byte.
+
+    After some thought we decided not to check that output stream
+    is failed. We will read requested number of bytes from bus.
+    May be used for speed testing and simpler code.
   */
 
-  TUnit Byte;
+  TUint_1 Byte;
   TBool Result;
   TUint_2 ByteNumber;
   TBool WantMore;
@@ -112,7 +121,7 @@ TBool TI2C_Master::Receive(
 
     Byte = Bare.Get_Byte(WantMore);
 
-    if (!OutStream->Write(Byte)) goto Finish;
+    OutStream->Write(Byte);
   }
   while (WantMore);
 
@@ -128,4 +137,5 @@ TBool TI2C_Master::Receive(
 /*
   2026-04-07
   2026-04-10
+  2026-04-11
 */
