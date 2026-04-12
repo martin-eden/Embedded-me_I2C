@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-11
+  Last mod.: 2026-04-12
 */
 
 #include <me_I2C.h>
@@ -54,7 +54,15 @@ static TUint_1 GetStatus()
 */
 static void WaitForReady()
 {
-  while (!Bare_ATmega328::Control->Ready);
+  // 240+ 180- 220+
+  const TUint_1 MaxNumTries = 220;
+  TUint_1 NumTries = 0;
+
+  while (!Bare_ATmega328::Control->Ready)
+  {
+    if (NumTries > MaxNumTries) break;
+    ++NumTries;
+  }
 }
 
 /*
@@ -158,11 +166,18 @@ void TI2C_Master_Bare::Stop()
   Bare_ATmega328::TControl State;
   TUint_1 Status;
 
-  /*
-    Protocol does not allow sending Stop after we acknowledged.
-  */
   Status = GetStatus();
+
+  // Protocol does not allow sending Stop after we acknowledged
   if (Status == (TUint_1) Bare_ATmega328::Statuses::Got_Data_Sent_Ack)
+    return;
+
+  // Idle status typically means no SCL connection
+  if (Status == (TUint_1) Bare_ATmega328::Statuses::Idle)
+    return;
+
+  // Protocol Violation usually means no SDA connection
+  if (Status == (TUint_1) Bare_ATmega328::Statuses::ProtocolViolation)
     return;
 
   State = GetState();
@@ -290,4 +305,5 @@ TUint_1 TI2C_Master_Bare::Get_Byte(
   2026-04-08
   2026-04-10
   2026-04-11
+  2024-04-12
 */
