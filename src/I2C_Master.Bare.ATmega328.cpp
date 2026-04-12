@@ -11,6 +11,7 @@
 
 #include <me_BaseTypes.h>
 #include <me_Bits.h>
+#include <me_Delays.h>
 
 using namespace me_I2C;
 
@@ -54,15 +55,11 @@ static TUint_1 GetStatus()
 */
 static void WaitForReady()
 {
-  // 240+ 180- 220+
-  const TUint_1 MaxNumTries = 220;
-  TUint_1 NumTries = 0;
+  // 10- 100+ 50- 80+
+  const TUint_4 Delay_Us = 120;
 
-  while (!Bare_ATmega328::Control->Ready)
-  {
-    if (NumTries > MaxNumTries) break;
-    ++NumTries;
-  }
+  if (Bare_ATmega328::Control->Ready) return;
+  me_Delays::Delay_Us(Delay_Us);
 }
 
 /*
