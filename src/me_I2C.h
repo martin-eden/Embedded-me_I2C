@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-07
+  Last mod.: 2026-04-13
 */
 
 #pragma once
@@ -44,7 +44,7 @@ namespace me_I2C
       void Init();
       void Done();
 
-      TBool Send(TDeviceAddress, TUint_2, IInputStream *);
+      TBool Send(TDeviceAddress, IInputStream *);
       TBool Receive(TDeviceAddress, TUint_2, IOutputStream *);
 
     private:
@@ -54,4 +54,5 @@ namespace me_I2C
 
 /*
   2026-04-07
+  2026-04-13
 */

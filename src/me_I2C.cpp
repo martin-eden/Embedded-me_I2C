@@ -36,7 +36,6 @@ void TI2C_Master::Done()
 */
 TBool TI2C_Master::Send(
   TDeviceAddress DeviceAddress,
-  TUint_2 PacketSize,
   IInputStream * InStream
 )
 {
@@ -49,7 +48,6 @@ TBool TI2C_Master::Send(
 
   TUnit Byte;
   TBool Result;
-  TUint_2 NumBytesSent;
 
   Result = false;
 
@@ -57,15 +55,8 @@ TBool TI2C_Master::Send(
 
   if (!Bare.Send_Address_Write(DeviceAddress)) goto Finish;
 
-  NumBytesSent = 0;
-  while (NumBytesSent < PacketSize)
-  {
-    if (!InStream->Read(&Byte)) goto Finish;
-
+  while (InStream->Read(&Byte))
     if (!Bare.Send_Data(Byte)) goto Finish;
-
-    ++NumBytesSent;
-  }
 
   Result = true;
 
