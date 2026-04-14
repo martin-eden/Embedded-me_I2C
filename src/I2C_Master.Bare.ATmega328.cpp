@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-12
+  Last mod.: 2026-04-14
 */
 
 #include <me_I2C.h>
@@ -167,6 +167,10 @@ void TI2C_Master_Bare::Stop()
 
   // Protocol does not allow sending Stop after we acknowledged
   if (Status == (TUint_1) Bare_ATmega328::Statuses::Got_Data_Sent_Ack)
+    return;
+
+  // Hardware does not allow sending Stop after we got address reply
+  if (Status == (TUint_1) Bare_ATmega328::Statuses::Sent_AddrRead_Got_Ack)
     return;
 
   // Idle status typically means no SCL connection
