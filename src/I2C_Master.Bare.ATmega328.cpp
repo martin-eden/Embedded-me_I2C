@@ -274,7 +274,6 @@ TBool TI2C_Master_Bare::Send_Data(
     (Status == (TUint_1) Bare_ATmega328::Statuses::Sent_Data_Got_Ack);
 }
 
-
 /*
   Get byte
 
