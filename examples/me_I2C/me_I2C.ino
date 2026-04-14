@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-13
+  Last mod.: 2026-04-14
 */
 
 /*
@@ -42,7 +42,7 @@ void RunTest()
   RespWriteStream.Init(ResponseSeg);
 
   Twi.Init();
-  Twi.Send(DeviceId, &RequestStream);
+  Twi.Send(DeviceId, RequestSize, &RequestStream);
   Twi.Receive(DeviceId, ResponseSize, &RespWriteStream);
   Twi.Done();
 
