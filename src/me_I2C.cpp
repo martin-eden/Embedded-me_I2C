@@ -2,7 +2,7 @@
 
 /*
   Author: Martin Eden
-  Last mod.: 2026-04-11
+  Last mod.: 2026-04-14
 */
 
 #include <me_I2C.h>
@@ -36,6 +36,7 @@ void TI2C_Master::Done()
 */
 TBool TI2C_Master::Send(
   TDeviceAddress DeviceAddress,
+  TUint_2 PacketSize,
   IInputStream * InStream
 )
 {
@@ -55,8 +56,12 @@ TBool TI2C_Master::Send(
 
   if (!Bare.Send_Address_Write(DeviceAddress)) goto Finish;
 
-  while (InStream->Read(&Byte))
+  while (PacketSize != 0)
+  {
+    if (!InStream->Read(&Byte)) goto Finish;
     if (!Bare.Send_Data(Byte)) goto Finish;
+    --PacketSize;
+  }
 
   Result = true;
 
@@ -80,22 +85,16 @@ TBool TI2C_Master::Receive(
     Similar as for Send() we will emit stop condition and return false
     if output stream fails.
 
-    Caveat is that we must say whether we are happy with byte received
-    before hardware show it to us. If we said we are happy but then
-    discovered we can't write it to stream we can't stop. We may ask
-    to stop at receiving next byte.
-
     After some thought we decided not to check that output stream
     is failed. We will read requested number of bytes from bus.
-    May be used for speed testing and simpler code.
+    Makes code simpler and useful for speed testing.
   */
 
   TUint_1 Byte;
   TBool Result;
-  TUint_2 ByteNumber;
   TBool WantMore;
 
-  // No support in receiving zero bytes from device
+  // Receiving zero bytes from device is not supported by hardware
   if (PacketSize == 0) return false;
 
   Result = false;
@@ -104,17 +103,13 @@ TBool TI2C_Master::Receive(
 
   if (!Bare.Send_Address_Read(DeviceAddress)) goto Finish;
 
-  ByteNumber = 0;
-  do {
-    ++ByteNumber;
-
-    WantMore = (ByteNumber < PacketSize);
-
+  while (PacketSize != 0)
+  {
+    WantMore = (PacketSize != 1);
     Byte = Bare.Get_Byte(WantMore);
-
     OutStream->Write(Byte);
-  }
-  while (WantMore);
+    --PacketSize;
+  };
 
   Result = true;
 
@@ -129,4 +124,5 @@ TBool TI2C_Master::Receive(
   2026-04-07
   2026-04-10
   2026-04-11
+  2026-04-14
 */
